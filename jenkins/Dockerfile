@@ -5,10 +5,13 @@ RUN apt-get update \
       && apt-get install -y sudo \
       && rm -rf /var/lib/apt/lists/*
 RUN echo "jenkins ALL=NOPASSWD: ALL" >> /etc/sudoers
+RUN mkdir -p /var/jenkins_home && \
+	chown -R jenkins:jenkins /var/jenkins_home && \
+	chmod ug+rwx /var/jenkins_home
 USER jenkins
 
-COPY plugins.txt /var/jenkins_home/plugins.txt
-RUN /usr/local/bin/plugins.sh /var/jenkins_home/plugins.txt
+COPY plugins.txt  /usr/share/jenkins/ref/plugins.txt
+RUN /usr/local/bin/plugins.sh  /usr/share/jenkins/ref/plugins.txt
 
 # Adding default Jenkins Jobs
 COPY jobs/1-github-seed-job.xml /usr/share/jenkins/ref/jobs/1-github-seed-job/config.xml
@@ -32,3 +35,5 @@ COPY config/maven-global-settings-files.xml /usr/share/jenkins/ref/maven-global-
 COPY config/credentials.xml /usr/share/jenkins/ref/credentials.xml
 COPY config/ssh-keys/cd-demo /usr/share/jenkins/ref/.ssh/id_rsa
 COPY config/ssh-keys/cd-demo.pub /usr/share/jenkins/ref/.ssh/id_rsa.pub
+
+VOLUME ["/var/jenkins_home"]
