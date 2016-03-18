@@ -4,6 +4,8 @@ services:
     build: ./nexus
     ports:
       - "18081:8081"
+    volumes:
+      - /srv/docker/nexus/work:/opt/sonatype-work
 
   jenkins:
     build: ./jenkins
@@ -72,7 +74,7 @@ services:
       - selhub
 
   gitlab:
-    image: sameersbn/gitlab:8.3.2
+    image: sameersbn/gitlab:8.5.8
     links:
       - redis:redisio
       - db2:db2

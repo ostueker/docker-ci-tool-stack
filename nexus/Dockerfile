@@ -32,19 +32,19 @@ ENV JAVA_HOME /usr/lib/jvm/jre
 ##########################################################
 # Install Nexus
 ##########################################################
-RUN mkdir -p /opt/sonatype-nexus /opt/sonatype-work
+RUN mkdir -p /opt/sonatype-nexus /opt/sonatype-work /opt/sonatype-default
 RUN wget -O /tmp/nexus-latest-bundle.tar.gz http://www.sonatype.org/downloads/nexus-latest-bundle.tar.gz
 RUN tar xzvf /tmp/nexus-latest-bundle.tar.gz -C /opt/sonatype-nexus --strip-components=1
 RUN useradd --user-group --system --home-dir /opt/sonatype-nexus nexus
 
-ADD nexus.xml /opt/sonatype-work/nexus/conf/nexus.xml
+ADD nexus.xml      /opt/sonatype-default/nexus.xml
+RUN chown -R nexus:nexus /opt/sonatype-work /opt/sonatype-default /opt/sonatype-nexus
 
-RUN chown -R nexus:nexus /opt/sonatype-work /opt/sonatype-nexus
+ADD start-nexus.sh /opt/start-nexus.sh
+RUN chmod +rx /opt/start-nexus.sh
 
 ENV NEXUS_WEBAPP_CONTEXT_PATH /nexus
-RUN echo "#!/bin/bash" > /opt/start-nexus.sh
-RUN echo "su -c \"/opt/sonatype-nexus/bin/nexus console\" - nexus" >> /opt/start-nexus.sh
-RUN chmod +x /opt/start-nexus.sh
+VOLUME ["/opt/sonatype-work"]
 
 CMD ["/opt/start-nexus.sh"]
 EXPOSE 8081
