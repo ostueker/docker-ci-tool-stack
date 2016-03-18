@@ -23,6 +23,7 @@ services:
       - sonar
       - selhub
     environment:
+      - JENKINS_OPTS="--prefix=/jenkins"
       - NEXUS_PORT=8081
       - SONAR_PORT=9000
       - SONAR_DB_PORT=5432
@@ -33,6 +34,7 @@ services:
      - "19000:9000"
      - "5432:5432"
     environment:
+     - SONARQUBE_CONTEXT=/sonar
      - SONARQUBE_JDBC_URL=jdbc:postgresql://localhost:5432/sonar
 
   db:
@@ -95,6 +97,7 @@ services:
       - GITLAB_HOST=localhost
       - GITLAB_PORT=10080
       - GITLAB_SSH_PORT=10022
+      - GITLAB_RELATIVE_URL_ROOT=/gitlab
 
       - GITLAB_NOTIFY_ON_BROKEN_BUILDS=true
       - GITLAB_NOTIFY_PUSHER=false
