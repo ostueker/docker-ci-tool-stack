@@ -6,7 +6,7 @@
 # Original: https://hub.docker.com/_/sonarqube/
 #
 
-FROM java:openjdk-8u45-jdk
+FROM java:8-jdk
 
 MAINTAINER Marcel Birkner <marcel.birkner@codecentric.de>
 
@@ -41,13 +41,19 @@ RUN set -x \
 	&& gpg --verify sonarqube.zip.asc \
 	&& unzip sonarqube.zip \
 	&& mv sonarqube-$SONAR_VERSION sonarqube \
-  && rm sonarqube.zip* \
+	&& rm sonarqube.zip* \
 	&& rm -rf $SONARQUBE_HOME/bin/*
 
 # Installing Plugins
+## Note with java:8-jdk curl fails to validate the SSL certificate for $SONAR_DOWNLOAD_URL
+## Therefore we'll use '--insecure' and also download the gpg-signatures and check those.
 RUN cd /opt/sonarqube/extensions/plugins/ \
-  && curl -o sonar-java-plugin-3.5.jar -fSL $SONAR_DOWNLOAD_URL/sonar-java-plugin/sonar-java-plugin-3.5.jar \
-  && curl -o sonar-web-plugin-2.4.jar -fSL $SONAR_DOWNLOAD_URL/sonar-web-plugin/sonar-web-plugin-2.4.jar \
+  && curl -o sonar-java-plugin-3.5.jar     -fSL --insecure $SONAR_DOWNLOAD_URL/sonar-java-plugin/sonar-java-plugin-3.5.jar \
+  && curl -o sonar-java-plugin-3.5.jar.asc -fSL --insecure $SONAR_DOWNLOAD_URL/sonar-java-plugin/sonar-java-plugin-3.5.jar.asc \
+  && gpg --verify sonar-java-plugin-3.5.jar.asc \
+  && curl -o sonar-web-plugin-2.4.jar      -fSL --insecure $SONAR_DOWNLOAD_URL/sonar-web-plugin/sonar-web-plugin-2.4.jar \
+  && curl -o sonar-web-plugin-2.4.jar.asc  -fSL --insecure $SONAR_DOWNLOAD_URL/sonar-web-plugin/sonar-web-plugin-2.4.jar.asc \
+  && gpg --verify sonar-web-plugin-2.4.jar.asc \
   && curl -o sonar-scm-git-plugin-1.1.jar -fSL http://downloads.sonarsource.com/plugins/org/codehaus/sonar-plugins/sonar-scm-git-plugin/1.1/sonar-scm-git-plugin-1.1.jar
 
 VOLUME ["$SONARQUBE_HOME/data", "$SONARQUBE_HOME/extensions"]
